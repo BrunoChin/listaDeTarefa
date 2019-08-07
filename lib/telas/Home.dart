@@ -10,10 +10,17 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-
   List listaTarefa = [];
-
   final controleTarefa = TextEditingController();
+
+  void initStatus(){
+    super.initState();
+    lerArquivo().then((dado){
+      setState(() {
+        listaTarefa = jsonDecode(dado);
+      });
+    });
+  }
 
   void addTarefa(){
     setState(() {
@@ -23,9 +30,12 @@ class _HomeState extends State<Home> {
         novaTarefa["ok"] = false;
         listaTarefa.add(novaTarefa);
         controleTarefa.text = "";
+        salvarArquivo();
       }
     });
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -73,6 +83,7 @@ class _HomeState extends State<Home> {
                      onChanged: (c){
                        setState(() {
                          listaTarefa[index]["ok"] = c;
+                         salvarArquivo();
                        });
                      },
                    );
@@ -89,20 +100,19 @@ class _HomeState extends State<Home> {
 
 
   //pegar/criar local do arquivo
-  Future<File> pegarArquivo() async{
+  Future<File> _pegarArquivo() async{
     final diretorio = await getApplicationDocumentsDirectory();
     return File("${diretorio.path}/arquivo.json");
   }
 
   Future<File> salvarArquivo()async{
     String dados = json.encode(listaTarefa);
-    final file = await pegarArquivo();
+    final file = await _pegarArquivo();
     return file.writeAsString(dados);
   }
 
   Future<String> lerArquivo() async{
-    final file = await pegarArquivo();
+    final file = await _pegarArquivo();
     return file.readAsString();
   }
-
 }
